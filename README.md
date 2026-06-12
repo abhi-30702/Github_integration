@@ -1,79 +1,90 @@
-# GitHub Integration Dashboard
+# Dev Dashboard
 
-> **Author:** Abhishek K
-> **Version:** 1.0.0
+> **Author:** Abhishek K  
+> **Version:** 1.0.1  
+> **Platform:** Windows 10/11 x64
+
+A desktop app that connects to your real GitHub account — view your repos, contribution graph, and activity feed, and automatically create GitHub repositories when you add a new project folder locally.
 
 ---
 
-## Overview
+## Download
 
-**GitHub Integration Dashboard** is a full-featured GitHub profile and repository viewer — built with React and styled with GitHub's native dark aesthetic. It displays your contribution activity, repositories, language stats, and a live activity feed — all in one place, with live search and language filtering.
+**[Dev Dashboard Setup 1.0.1.exe](https://github.com/abhi-30702/Github_integration/releases/tag/v1.0.1)**
 
-This is the GitHub profile page you wish GitHub actually had.
+1. Download and run the installer
+2. If Windows shows a SmartScreen warning, click **More info → Run anyway**
+3. Sign in with GitHub when the app opens
 
 ---
 
 ## Features
 
-### Profile
-- **Profile card** with avatar, bio, location chips, tech stack badges
-- **Language distribution bar** — proportional language breakdown
-- **Key stats** — repos, followers, total commits (one glance)
-
-### Contribution Grid
-- **364-cell animated grid** — cells reveal progressively on page load (staggered animation)
-- **5-level color scale** — GitHub-native green depth shading
-- **Month labels** — Jan through Dec across the top
-- **Hover tooltips** — contribution count per day
-- **Deterministic rendering** — consistent grid on each render
-
-### Repositories
-- **Live search** — filter repos by name or description in real time
-- **Language filter tabs** — All / TypeScript / Python / JavaScript
-- **Repo cards** with: language dot, star count, fork count, PR badge, status badge (Open/Merged/Closed)
-- **Hover slide** — cards slide right on hover
-
-### Activity Feed
-- Chronological activity: pushes, PRs, issues, stars, forks, releases
-- Color-coded by action type
-- JetBrains Mono timestamps
+- **GitHub OAuth login** — sign in with your own GitHub account, no personal access token needed
+- **Repositories** — live search and filter by language (TypeScript, Python, JavaScript)
+- **Contribution graph** — 52-week contribution calendar pulled from GitHub GraphQL API
+- **Activity feed** — pushes, PRs, issues, stars, forks, and releases in real time
+- **Profile card** — avatar, bio, follower stats, and language distribution
+- **Folder watcher** — set a local projects folder; when you create a new subfolder, the app offers to create a matching GitHub repository automatically
+- **New Project button** — manually trigger repo creation from inside the app
+- **Repo creation modal** — set name, description, and public/private before creating
 
 ---
 
 ## Tech Stack
 
-| Technology | Purpose |
+| Layer | Technology |
 |---|---|
-| React 18 | UI framework |
-| Cabinet Grotesk | Display font |
-| JetBrains Mono | Monospace / code font |
-| CSS Variables | GitHub-native dark theming |
-
-> No chart libraries needed — the contribution grid is pure CSS Grid + JS.
+| UI | React 18 (Create React App) |
+| Desktop shell | Electron 29 |
+| Auth | GitHub OAuth (custom URL protocol) |
+| Token storage | Electron `safeStorage` (DPAPI on Windows) |
+| GitHub API | REST + GraphQL via native `https` |
+| File watching | chokidar v3 |
+| Installer | electron-builder NSIS |
 
 ---
 
-## Getting Started
+## Developer Setup
 
 ### Prerequisites
-- Node.js 16+
-- npm or yarn
+- Node.js 18+
+- A GitHub OAuth App ([create one here](https://github.com/settings/developers))
 
-### Install & Run
+### OAuth App Settings
+| Field | Value |
+|---|---|
+| Homepage URL | `https://github.com/abhi-30702/Github_integration` |
+| Authorization callback URL | `github-dashboard://oauth/callback` |
+
+### Install & Run (dev mode)
 
 ```bash
-cd github-integration
+git clone https://github.com/abhi-30702/Github_integration.git
+cd Github_integration
 npm install
-npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Create a `.env` file in the project root:
 
-### Production Build
+```
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_CLIENT_SECRET=your_client_secret
+```
+
+Start the app in development mode (React + Electron together):
 
 ```bash
-npm run build
+npm run dev
 ```
+
+### Build Installer
+
+```bash
+npm run dist
+```
+
+Output: `dist/Dev Dashboard Setup 1.0.1.exe`
 
 ---
 
@@ -81,102 +92,42 @@ npm run build
 
 ```
 github-integration/
-├── public/
-│   └── index.html
+├── electron/
+│   ├── main.js          # Electron main process — OAuth, GitHub API, file watcher, IPC
+│   └── preload.js       # contextBridge — secure API exposed to renderer
 ├── src/
+│   ├── context/
+│   │   └── AuthContext.js       # Auth state (login/logout)
+│   ├── hooks/
+│   │   └── useGitHub.js         # Data fetching + mappers for repos, activity, contributions
 │   ├── components/
-│   │   ├── ProfileCard.js          # Profile with language bar + stats
-│   │   ├── ContributionGrid.js     # 364-cell animated contribution graph
-│   │   ├── RepoCard.js             # Repo with stats, badges, hover effect
-│   │   └── ActivityFeed.js         # Chronological activity list
-│   ├── data.js                     # Profile, repos, activity mock data
-│   ├── App.js                      # Root with search + language filter
-│   ├── index.js                    # Entry point
-│   └── index.css                   # Global styles + CSS variables
+│   │   ├── ProfileCard.js
+│   │   ├── ContributionGrid.js
+│   │   ├── RepoCard.js
+│   │   ├── ActivityFeed.js
+│   │   ├── CreateRepoModal.js
+│   │   ├── WatchDirModal.js
+│   │   └── Toast.js
+│   ├── pages/
+│   │   ├── LoginPage.js
+│   │   └── DashboardPage.js
+│   └── App.js
+├── .env                 # OAuth credentials (not committed)
+├── electron-builder.yml
 └── package.json
 ```
 
 ---
 
-## Mock Data
+## Security
 
-All mock data is in `src/data.js`. Edit to match your profile:
-
-```js
-export const PROFILE = {
-  name: 'Abhishek K',
-  handle: 'abhishek-dev',
-  avatar: '🦁',
-  bio: 'Full-stack engineer · Fintech · Building EduCIBIL & AI-powered products',
-  location: 'Bengaluru, India',
-  repos: 47,
-  followers: 892,
-  commits: 1247,
-};
-
-export const REPOS = [
-  {
-    name: 'educibil',
-    desc: 'Credit bureau model for education financing',
-    lang: 'TypeScript',
-    langColor: '#3178c6',
-    stars: 124,
-    forks: 18,
-    status: 'open',
-    prs: 3,
-  },
-  // Add more repos...
-];
-```
-
----
-
-## Connecting to Real GitHub API
-
-Replace mock data with live GitHub API calls:
-
-```js
-// Fetch profile
-const profile = await fetch('https://api.github.com/users/YOUR_USERNAME', {
-  headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }
-}).then(r => r.json());
-
-// Fetch repos
-const repos = await fetch('https://api.github.com/users/YOUR_USERNAME/repos?sort=stars&per_page=20', {
-  headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }
-}).then(r => r.json());
-
-// Fetch contribution data (requires GraphQL API)
-const contributions = await fetch('https://api.github.com/graphql', {
-  method: 'POST',
-  headers: { Authorization: `Bearer ${GITHUB_TOKEN}` },
-  body: JSON.stringify({
-    query: `{ user(login: "YOUR_USERNAME") { contributionsCollection { contributionCalendar { weeks { contributionDays { contributionCount date } } } } } }`
-  })
-}).then(r => r.json());
-```
-
-> GitHub personal access tokens: [github.com/settings/tokens](https://github.com/settings/tokens)
-
----
-
-## Design System
-
-| Token | Value |
-|---|---|
-| Background | `#0d1117` |
-| Surface | `#161b22` |
-| Surface 2 | `#21262d` |
-| Border | `#30363d` |
-| Text | `#e6edf3` |
-| Green (contributions) | `#39d353` |
-| Blue (links) | `#58a6ff` |
-| Purple (PRs) | `#bc8cff` |
-| Font Display | Cabinet Grotesk |
-| Font Mono | JetBrains Mono |
+- `nodeIntegration` is disabled — the renderer has no direct Node.js access
+- All GitHub API calls and token handling happen in the main process
+- OAuth tokens are encrypted with Windows DPAPI via Electron `safeStorage`
+- Content Security Policy headers are applied to all renderer requests
 
 ---
 
 ## Author
 
-**Abhishek K** · Built with React 18 · 2025
+**Abhishek K** · Built with Electron + React 18 · 2026
