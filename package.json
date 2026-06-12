@@ -1,6 +1,6 @@
 {
   "name": "github-dashboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "GitHub Integration Dashboard — Desktop App",
   "private": true,
   "main": "electron/main.js",
@@ -9,7 +9,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "dev": "concurrently \"react-scripts start\" \"wait-on http://localhost:3000 && electron .\"",
-    "dist": "react-scripts build && electron-builder --win"
+    "dist": "react-scripts build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win"
   },
   "dependencies": {
     "chokidar": "^3.6.0",
@@ -23,6 +23,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0",
     "electron": "^29.0.0",
     "electron-builder": "^24.13.3",
     "wait-on": "^7.2.0"
