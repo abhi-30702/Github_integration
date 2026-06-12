@@ -1,5 +1,5 @@
 appId: com.abhishek.github-dashboard
-productName: GitHub Dashboard
+productName: Dev Dashboard
 copyright: Copyright © 2026 Abhishek
 
 directories:
@@ -29,7 +29,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: GitHub Dashboard
+  shortcutName: Dev Dashboard
 
 extraMetadata:
   main: electron/main.js
