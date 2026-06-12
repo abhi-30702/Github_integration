@@ -53,10 +53,13 @@ export default function DashboardPage() {
     return cleanup;
   }, []);
 
-  const handleRepoCreated = useCallback(({ name }) => {
+  const handleRepoCreated = useCallback(({ name, pushed }) => {
     setDetectedFolder(null);
     setShowNewProject(false);
-    setToast({ message: `✅ Created github.com/${user.login}/${name}`, type: 'success' });
+    const msg = pushed
+      ? `✅ Created & pushed github.com/${user.login}/${name}`
+      : `✅ Created github.com/${user.login}/${name}`;
+    setToast({ message: msg, type: 'success' });
     refresh();
   }, [refresh, user]);
 

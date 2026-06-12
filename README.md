@@ -1,7 +1,7 @@
 # Dev Dashboard
 
 > **Author:** Abhishek K  
-> **Version:** 1.0.1  
+> **Version:** 1.0.2  
 > **Platform:** Windows 10/11 x64
 
 A desktop app that connects to your real GitHub account — view your repos, contribution graph, and activity feed, and automatically create GitHub repositories when you add a new project folder locally.

@@ -286,16 +286,56 @@ ipcMain.handle('github:create-repo', async (_, { name, description, isPrivate, l
 
   if (!repo.clone_url) throw new Error(repo.message || 'Failed to create repository');
 
+  let pushed = false;
+
   if (localPath && fs.existsSync(localPath)) {
     try {
-      execSync('git init', { cwd: localPath, stdio: 'ignore' });
-      execSync(`git remote add origin ${repo.clone_url}`, { cwd: localPath, stdio: 'ignore' });
+      const authedUrl = repo.clone_url.replace('https://', `https://x-access-token:${token}@`);
+      const { userLogin } = readConfig();
+      const execOpts = { cwd: localPath, stdio: 'pipe' };
+
+      if (!fs.existsSync(path.join(localPath, '.git'))) {
+        execSync('git init', execOpts);
+      }
+
+      execSync('git config user.name "Dev Dashboard"', execOpts);
+      execSync(`git config user.email "${userLogin || 'user'}@users.noreply.github.com"`, execOpts);
+
+      try {
+        execSync(`git remote add origin "${authedUrl}"`, execOpts);
+      } catch {
+        execSync(`git remote set-url origin "${authedUrl}"`, execOpts);
+      }
+
+      // Create a README if the folder is empty so there's something to push
+      const entries = fs.readdirSync(localPath).filter(f => f !== '.git');
+      if (entries.length === 0) {
+        fs.writeFileSync(
+          path.join(localPath, 'README.md'),
+          `# ${name}\n\n${description || ''}\n`.trimEnd() + '\n'
+        );
+      }
+
+      execSync('git add .', execOpts);
+
+      const status = execSync('git status --porcelain', { cwd: localPath }).toString().trim();
+      if (status) {
+        execSync('git commit -m "initial commit"', execOpts);
+      }
+
+      execSync('git branch -M main', execOpts);
+      execSync('git push -u origin main', execOpts);
+
+      // Strip the token from the stored remote URL
+      execSync(`git remote set-url origin "${repo.clone_url}"`, execOpts);
+
+      pushed = true;
     } catch (err) {
-      console.warn('git init/remote failed:', err.message);
+      console.warn('Git push failed:', err.message);
     }
   }
 
-  return { cloneUrl: repo.clone_url, htmlUrl: repo.html_url, name: repo.name };
+  return { cloneUrl: repo.clone_url, htmlUrl: repo.html_url, name: repo.name, pushed };
 });
 
 // ── IPC: File Watcher ─────────────────────────────────────────────────────────

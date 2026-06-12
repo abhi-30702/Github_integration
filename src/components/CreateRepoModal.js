@@ -94,7 +94,7 @@ export default function CreateRepoModal({ folderName = '', folderPath = null, on
             color: '#fff', cursor: loading || !name.trim() ? 'not-allowed' : 'pointer',
             fontSize: '.85rem', fontWeight: 600, transition: 'background .2s',
           }}>
-            {loading ? 'Creating…' : 'Create Repo'}
+            {loading ? (folderPath ? 'Creating & pushing…' : 'Creating…') : 'Create Repo'}
           </button>
         </div>
       </div>
