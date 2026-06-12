@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment — contains OAuth client secret, never commit
+.env
+
+# Build output
+build/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
