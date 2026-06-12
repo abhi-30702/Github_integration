@@ -5,6 +5,9 @@ import ProfileCard from '../components/ProfileCard';
 import ContributionGrid from '../components/ContributionGrid';
 import RepoCard from '../components/RepoCard';
 import ActivityFeed from '../components/ActivityFeed';
+import CreateRepoModal from '../components/CreateRepoModal';
+import WatchDirModal from '../components/WatchDirModal';
+import Toast from '../components/Toast';
 
 const GH_ICON = (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
@@ -179,95 +182,23 @@ export default function DashboardPage() {
         <div style={{ fontSize: '.72rem', color: 'var(--muted)', fontFamily: 'var(--font-mono)' }}>api.github.com · {user?.login}</div>
       </div>
 
-      {/* MODALS — wired in Tasks 10–13, placeholders here */}
       {(detectedFolder || showNewProject) && (
-        <CreateRepoModalPlaceholder
+        <CreateRepoModal
           folderName={detectedFolder?.folderName || ''}
           folderPath={detectedFolder?.folderPath || null}
           onConfirm={handleRepoCreated}
           onSkip={handleSkip}
-          onClose={() => { setDetectedFolder(null); setShowNewProject(false); }}
         />
       )}
       {showWatchDir && (
-        <WatchDirModalPlaceholder onClose={() => setShowWatchDir(false)} />
+        <WatchDirModal
+          onSelect={() => setShowWatchDir(false)}
+          onDismiss={() => setShowWatchDir(false)}
+        />
       )}
       {toast && (
-        <div style={{
-          position: 'fixed', bottom: '1.5rem', right: '1.5rem',
-          background: toast.type === 'success' ? '#238636' : '#da3633',
-          color: '#fff', padding: '12px 16px', borderRadius: 8,
-          fontSize: '.85rem', cursor: 'pointer', zIndex: 2000,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-        }} onClick={() => setToast(null)}>
-          {toast.message}
-        </div>
+        <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />
       )}
-    </div>
-  );
-}
-
-// Temporary placeholders — replaced by real components in Tasks 12–13
-function CreateRepoModalPlaceholder({ folderName, folderPath, onConfirm, onSkip, onClose }) {
-  const [name, setName] = React.useState(folderName);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
-
-  const handleCreate = async () => {
-    if (!name.trim()) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await window.electronAPI.createRepo({ name: name.trim(), description: '', isPrivate: true, localPath: folderPath });
-      onConfirm(result);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '1.5rem', width: 380 }}>
-        <div style={{ fontWeight: 700, marginBottom: '1rem' }}>{folderPath ? '📁 New folder detected' : '✨ New Project'}</div>
-        {folderPath && <div style={{ fontSize: '.72rem', color: 'var(--muted)', marginBottom: '.75rem', fontFamily: 'var(--font-mono)' }}>{folderPath}</div>}
-        <input value={name} onChange={e => setName(e.target.value)} placeholder="repo-name"
-          style={{ width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 10px', color: 'var(--text)', fontSize: '.85rem', boxSizing: 'border-box', marginBottom: '.75rem' }} />
-        {error && <div style={{ color: '#f85149', fontSize: '.78rem', marginBottom: '.75rem' }}>⚠️ {error}</div>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onSkip} style={{ padding: '8px 16px', borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', cursor: 'pointer' }}>Skip</button>
-          <button onClick={handleCreate} disabled={loading || !name.trim()} style={{ padding: '8px 16px', borderRadius: 6, border: 'none', background: '#238636', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
-            {loading ? 'Creating…' : 'Create Repo'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function WatchDirModalPlaceholder({ onClose }) {
-  const [loading, setLoading] = React.useState(false);
-  const handlePick = async () => {
-    setLoading(true);
-    const dir = await window.electronAPI.pickWatchDir();
-    setLoading(false);
-    if (dir) onClose();
-  };
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 900 }}>
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '2rem', width: 400, textAlign: 'center' }}>
-        <div style={{ fontSize: '2rem', marginBottom: '.5rem' }}>📂</div>
-        <div style={{ fontWeight: 700, marginBottom: '.5rem' }}>Set your projects folder</div>
-        <div style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-          GitHub Dashboard will watch this folder for new projects.
-        </div>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-          <button onClick={onClose} style={{ padding: '9px 16px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', cursor: 'pointer' }}>Skip for now</button>
-          <button onClick={handlePick} disabled={loading} style={{ padding: '9px 20px', borderRadius: 8, border: 'none', background: '#238636', color: '#fff', cursor: 'pointer', fontWeight: 600 }}>
-            {loading ? 'Selecting…' : 'Choose folder'}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
