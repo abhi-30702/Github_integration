@@ -31,5 +31,9 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: Dev Dashboard
 
+extraResources:
+  - from: .env
+    to: .env
+
 extraMetadata:
   main: electron/main.js

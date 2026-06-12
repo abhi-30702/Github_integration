@@ -4,9 +4,13 @@ const https = require('https');
 const fs = require('fs');
 const { execSync } = require('child_process');
 
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
-
 const isDev = !app.isPackaged;
+
+require('dotenv').config({
+  path: isDev
+    ? path.join(__dirname, '../.env')
+    : path.join(process.resourcesPath, '.env'),
+});
 let mainWindow;
 
 // ── Single instance lock ──────────────────────────────────────────────────────
@@ -202,7 +206,7 @@ ipcMain.handle('oauth:start', () => {
     pendingOAuthReject = (err) => reject(err);
 
     const scope = 'repo%20user%20read:org';
-    const authUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=github-dashboard://callback&scope=${scope}`;
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=github-dashboard://oauth/callback&scope=${scope}`;
     shell.openExternal(authUrl);
 
     setTimeout(() => {
