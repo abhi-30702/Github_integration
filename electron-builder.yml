@@ -1,0 +1,35 @@
+appId: com.abhishek.github-dashboard
+productName: GitHub Dashboard
+copyright: Copyright © 2026 Abhishek
+
+directories:
+  output: dist
+
+files:
+  - build/**/*
+  - electron/**/*
+  - node_modules/**/*
+  - package.json
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  protocols:
+    - name: GitHub Dashboard
+      schemes:
+        - github-dashboard
+  sign: ~
+  signingHashAlgorithms: []
+  signAndEditExecutable: false
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: GitHub Dashboard
+
+extraMetadata:
+  main: electron/main.js
